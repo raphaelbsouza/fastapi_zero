@@ -1,27 +1,49 @@
 from http import HTTPStatus
+
+import pytest
 from fastapi.testclient import TestClient
+
 from fastapi_zero.app import app
 
 
-#def test_root_deve_retornar_helloworld():
+@pytest.fixture
+def client():
+    return TestClient(app)
+
+
+# def test_root_deve_retornar_helloworld():
 #    """
 #   Esse teste tem 3 etapas (AAA)
 #   A = Arrange - arranjo
 #   A = ACT - Executa a coisa (o SUT)
 #   A = Assert - Garanta que A é A
 #   """
-    #arrange
+# arrange
 #   client = TestClient(app)
-    #Act
+# Act
 #   response = client.get('/')
-    #assert
+# assert
 #   assert response.json() == {'message': 'Olá mundo!'}
 #   assert response.status_code == HTTPStatus.OK
 
-def test_exercicio_ola_mundo_em_html():
-    client = TestClient(app)
 
-    response = client.get('/api')
+def test_created_user(client):
+    response = client.post(
+        '/users/',
+        json={
+            'username': 'alice',
+            'email': 'alice@example.com',
+            'password': 'secret',
+        },
+    )
 
-    assert response.status_code == HTTPStatus.OK
-    assert '<h1> Olá Mundo </h1>' in response.text
+    assert response.status_code == HTTPStatus.CREATED
+    assert response.json() == {
+        'id': 1,
+        'email': 'alice@example.com',
+        'username': 'alice',
+    }
+
+
+def test_read_users(client):
+    response = client.get('/users/')
